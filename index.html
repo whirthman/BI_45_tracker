@@ -6,823 +6,240 @@
 <title>Binary Trading Tracker — Dark Dashboard + Strategy</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 
-<style>
-  :root{
-    --bg-1: #071029; --bg-2: #081427;
-    --muted: #9fb0c8;
-    --neon-win: #16f085; --neon-loss: #ff6b6b; --accent: #60a5fa;
-    --glass-border: rgba(255,255,255,0.04);
-    --shadow: 0 8px 30px rgba(2,6,23,0.65);
-    color-scheme: dark;
-  }
-
-  html,body{height:100%;margin:0;background:
-    radial-gradient(1200px 600px at 10% 10%, rgba(20,60,100,0.08), transparent),
-    linear-gradient(180deg,var(--bg-1), var(--bg-2));
-    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial; color:#e6f0fb;
-    -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;}
-
-  .wrap{max-width:1100px;margin:20px auto;padding:16px;}
-
-  /* header */
-  header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
-  .brand{display:flex;align-items:center;gap:12px}
-  .logo{width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,#061226,#0b2340);display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.02)}
-  .logo span{font-weight:700;color:var(--accent)}
-  h1{font-size:18px;margin:0}
-  .desc{color:var(--muted);font-size:13px}
-
-  /* nav tabs */
-  .tabs{display:flex;gap:8px}
-  .tab{padding:8px 12px;border-radius:10px;background:transparent;border:1px solid transparent;color:var(--muted);cursor:pointer;font-weight:600}
-  .tab.active{background:linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-color:var(--glass-border);color:#fff;box-shadow:var(--shadow)}
-
-  /* layout */
-  .grid{display:grid;grid-template-columns: 1fr 380px;gap:18px;align-items:start}
-  @media (max-width:980px){ .grid{grid-template-columns:1fr} }
-
-  .card{background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:14px;padding:12px;box-shadow:var(--shadow);border:1px solid var(--glass-border);backdrop-filter: blur(6px)}
-  .card:hover{transform:translateY(-2px);transition:transform .18s ease}
-
-  .form-row{display:flex;gap:8px;align-items:center;margin-bottom:10px}
-  .input,.select,.btn{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:10px;border-radius:10px;color:inherit;outline:none;font-size:14px}
-  .btn.primary{background:linear-gradient(90deg,var(--neon-win), #60d2b8);color:#051418;border:0;font-weight:700}
-  .btn.danger{background:linear-gradient(90deg,var(--neon-loss), #ff9b9b);color:#111;border:0;font-weight:700}
-
-  .small{font-size:13px;color:var(--muted)}
-  .tiny{font-size:12px;color:var(--muted)}
-
-  /* stat bars */
-  .bars{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
-  @media (max-width:980px){ .bars{grid-template-columns:1fr} }
-  .stat-card{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:12px}
-  .bar-outer{height:12px;background:rgba(255,255,255,0.03);border-radius:8px;overflow:hidden}
-  .bar-inner{height:100%;width:0%;transition:width .6s cubic-bezier(.2,.9,.2,1);box-shadow:0 6px 18px rgba(2,10,20,0.6) inset}
-
-  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
-  @media (max-width:980px){ .kpi-grid{grid-template-columns:repeat(2,1fr)} }
-  .kpi{text-align:center;padding:10px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent)}
-  .kpi .num{font-weight:700;font-size:18px}
-  .kpi .label{color:var(--muted);font-size:12px;margin-top:6px}
-
-  /* stacked cards */
-  .stack{display:flex;flex-direction:column;gap:12px;margin-top:12px}
-
-  /* pairs table */
-  table.pairs{width:100%;border-collapse:collapse;margin-top:12px;background:transparent}
-  table.pairs thead th{text-align:left;padding:10px 12px;color:var(--muted);font-weight:600;border-bottom:1px solid rgba(255,255,255,0.03)}
-  table.pairs tbody td{padding:10px 12px;border-bottom:1px dashed rgba(255,255,255,0.03)}
-  table.pairs tbody tr:hover{background:linear-gradient(90deg, rgba(96,165,250,0.03), transparent)}
-  .pair-win{color:var(--neon-win);font-weight:700}
-  .pair-loss{color:var(--neon-loss);font-weight:700}
-
-  /* strategy page */
-  .strategy-grid{display:flex;flex-direction:column;gap:12px}
-  .strategy-card h3{margin:0 0 6px 0}
-  .tip{background:rgba(22,240,133,0.06);padding:8px;border-radius:8px;color:var(--neon-win);font-weight:600}
-
-  /* gallery: mobile-first responsive */
-  .gallery{display:grid;gap:12px}
-  .gallery-card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:12px;overflow:hidden;position:relative}
-  .gallery-card img{width:100%;height:auto;display:block}
-  .gallery-caption{padding:8px 10px;background:rgba(0,0,0,0.03);font-size:13px;color:var(--muted)}
-  .gallery-controls{display:flex;gap:8px;padding:8px;justify-content:flex-end}
-  .control-btn{font-size:13px;padding:6px 8px;border-radius:8px;border:0;cursor:pointer}
-  .control-btn.edit{background:rgba(96,165,250,0.08);color:var(--accent)}
-  .control-btn.del{background:rgba(255,107,107,0.08);color:var(--neon-loss)}
-
-  @media (min-width:640px){ .gallery{grid-template-columns:repeat(2,1fr)} }
-  @media (min-width:980px){ .gallery{grid-template-columns:repeat(3,1fr)} }
-
-  /* schema */
-  .schema-area textarea{width:100%;min-height:140px;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.05);background:transparent;color:inherit;resize:vertical}
-
-  /* footer */
-  footer{margin-top:18px;text-align:center;color:var(--muted);font-size:13px}
-</style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <div class="brand">
-        <div class="logo"><span>BT</span></div>
-        <div>
-          <h1>Binary Trading Tracker</h1>
-          <div class="desc">Dark dashboard • Trade-based logging • Strategy & Schema</div>
-        </div>
-      </div>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo"><span>BT</span></div>
+        <div>
+          <h1>Binary Trading Tracker</h1>
+          <div class="desc">Dark dashboard • Trade-based logging • Strategy & Schema</div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;align-items:flex-end">
+        <div class="tabs" role="tablist" aria-label="Main tabs">
+          <button class="tab active" data-tab="dashboard">Dashboard</button>
+          <button class="tab" data-tab="strategy">Strategy</button>
+          <button class="tab" data-tab="schema">Schema</button>
+        </div>
+        <div class="tiny" style="margin-top:6px;color:var(--muted)">Keyboard: W = Win, L = Loss, Ctrl/Cmd+S = Log</div>
+      </div>
+    </header>
+
+    <div class="grid">
+            <div class="main">
+                <section id="tab-dashboard">
+          <div class="card">
+            <div class="form-row">
+              <input id="pair" class="input" placeholder="Trading pair (e.g. USD/JPY)" />
+              <select id="result" class="select"><option value="win">Win</option><option value="loss">Loss</option></select>
+              <button id="logBtn" class="btn primary">Log Trade</button>
+              <button id="resetBtn" class="btn" title="Reset all data" style="opacity:.9">Reset</button>
+            </div>
+
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap">
+              <div class="small">Current Session</div>
+              <div class="tiny">Session closes when |wins - losses| ≥ 3</div>
+            </div>
+
+            <div class="bars" style="margin-top:12px">
+              <div class="card stat-card">
+                <div class="stat-row"><div class="title">Session (live)</div><div class="tiny" id="sessionLiveLabel">0W • 0L</div></div>
+                <div style="display:flex;gap:8px;align-items:center">
+                  <div style="flex:1"><div class="bar-outer"><div id="sessionLiveBar" class="bar-inner" style="background:linear-gradient(90deg,var(--neon-win), #60d2b8)"></div></div></div>
+                  <div style="width:62px;text-align:right;font-weight:700" id="sessionLivePct">0%</div>
+                </div>
+              </div>
+
+              <div class="card stat-card">
+                <div class="stat-row"><div class="title">Trades</div><div class="tiny" id="tradeLabel">0 trades</div></div>
+                <div style="display:flex;gap:8px;align-items:center">
+                  <div style="flex:1"><div class="bar-outer"><div id="tradeBar" class="bar-inner" style="background:linear-gradient(90deg,var(--neon-win), var(--accent))"></div></div></div>
+                  <div style="width:62px;text-align:right;font-weight:700" id="tradePct">0%</div>
+                </div>
+              </div>
+
+              <div class="card stat-card">
+                <div class="stat-row"><div class="title">Sessions</div><div class="tiny" id="sessionLabel">0 sessions</div></div>
+                <div style="display:flex;gap:8px;align-items:center">
+                  <div style="flex:1"><div class="bar-outer"><div id="sessionBar" class="bar-inner" style="background:linear-gradient(90deg,var(--neon-win), #3ee0b5)"></div></div></div>
+                  <div style="width:62px;text-align:right;font-weight:700" id="sessionPct">0%</div>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top:12px" class="kpi-grid">
+              <div class="kpi"><div class="num" id="k_totalTrades">0</div><div class="label">Total Trades</div></div>
+              <div class="kpi"><div class="num pair-win" id="k_tradeWins">0</div><div class="label">Trade Wins</div></div>
+              <div class="kpi"><div class="num pair-loss" id="k_tradeLosses">0</div><div class="label">Trade Losses</div></div>
+              <div class="kpi"><div class="num" id="k_tradeDiff">0</div><div class="label">Trade Diff</div></div>
+            </div>
+          </div>
+
+                    <div class="stack">
+            <div class="card">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div><strong>Trades</strong><div class="tiny">Wins / Losses / Diff / Win rate</div></div>
+                <div class="tiny" id="tradesSummary">0W • 0L</div>
+              </div>
+              <div style="margin-top:10px;display:flex;gap:12px;align-items:center;">
+                <div style="flex:1"><div class="bar-outer"><div id="tradesBar" class="bar-inner" style="background:linear-gradient(90deg,var(--neon-win), var(--accent))"></div></div></div>
+                <div style="width:80px;text-align:right;font-weight:700" id="tradesPct">0%</div>
+              </div>
+              <div style="margin-top:8px" class="tiny" id="tradesDetails"></div>
+            </div>
+
+            <div class="card">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div><strong>Sessions</strong><div class="tiny">Winning sessions / Losing sessions</div></div>
+                <div class="tiny" id="sessionsSummary">0W • 0L</div>
+              </div>
+              <div style="margin-top:10px;display:flex;gap:12px;align-items:center;">
+                <div style="flex:1"><div class="bar-outer"><div id="sessionsBar" class="bar-inner" style="background:linear-gradient(90deg,var(--neon-win), #3ee0b5)"></div></div></div>
+                <div style="width:80px;text-align:right;font-weight:700" id="sessionsPct">0%</div>
+              </div>
+              <div style="margin-top:8px" class="tiny" id="sessionsDetails"></div>
+            </div>
+
+            <div class="card">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div><strong>Days</strong><div class="tiny">Winning days / Losing days</div></div>
+                <div class="tiny" id="daysSummary">0W • 0L</div>
+              </div>
+              <div style="margin-top:10px;display:flex;gap:12px;align-items:center;">
+                <div style="flex:1"><div class="bar-outer"><div id="daysBar" class="bar-inner" style="background:linear-gradient(90deg,var(--neon-win), #7ef0c8)"></div></div></div>
+                <div style="width:80px;text-align:right;font-weight:700" id="daysPct">0%</div>
+              </div>
+              <div style="margin-top:8px" class="tiny" id="daysDetails"></div>
+            </div>
+
+            <div class="card">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div><strong>Weeks</strong><div class="tiny">Winning weeks / Losing weeks</div></div>
+                <div class="tiny" id="weeksSummary">0W • 0L</div>
+              </div>
+              <div style="margin-top:10px;display:flex;gap:12px;align-items:center;">
+                <div style="flex:1"><div class="bar-outer"><div id="weeksBar" class="bar-inner" style="background:linear-gradient(90deg,var(--neon-win), #9ff1d7)"></div></div></div>
+                <div style="width:80px;text-align:right;font-weight:700" id="weeksPct">0%</div>
+              </div>
+              <div style="margin-top:8px" class="tiny" id="weeksDetails"></div>
+            </div>
+          </div>
+
+                    <div class="card pairs-wrap" style="margin-top:12px">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div><strong>Trading Pairs Performance</strong><div class="tiny">Auto-updates on each trade</div></div>
+              <div class="tiny" id="pairCount">0 pairs</div>
+            </div>
+
+            <table class="pairs" style="margin-top:12px">
+              <thead>
+                <tr><th>Pair</th><th style="width:90px">Wins</th><th style="width:90px">Losses</th><th style="width:90px">Diff</th><th style="width:110px">Win %</th></tr>
+              </thead>
+              <tbody id="pairsTbody"></tbody>
+            </table>
+          </div>
+        </section>
+
+                <section id="tab-strategy" style="display:none">
+          <div class="card strategy-grid">
+                        <div style="display:flex;justify-content:space-between;align-items:center">
+              <div>
+                <h2 style="margin:0">Strategy Library</h2>
+                <div class="tiny">List your strategies, tips and examples. Paste image URL links into the gallery below.</div>
+              </div>
+              <div>
+                <button id="saveStrategyBtn" class="btn primary">Save Strategy Notes</button>
+                <button id="clearStrategyBtn" class="btn" style="margin-left:8px">Reset</button>
+              </div>
+            </div>
+
+                        <div class="strategy-card card">
+              <h3>Strategy 1 — Rejection from S/R Using Zigzag Reversal</h3>
+              <div class="tiny">Tools: Zigzag, Support/Resistance, Candle Momentum, Optional Stochastic/MACD</div>
+              <p class="small"><strong>Timeframe:</strong> 1-Min Entry | 5s Observation • <strong>Duration:</strong> 1 minute</p>
+              <p class="small">How it works: Identify zigzag highs/lows and S/R zones. Watch for shrinking bullish candles and rejection wicks at levels (especially resistance). Enter when momentum weakens near S/R using candle body size and rejection as confirmation.</p>
+              <div class="tip">Tip: Strong rejection wick after consistent candles at a key level often signals a shift. Be patient.</div>
+            </div>
+
+            <div class="strategy-card card">
+              <h3>Strategy 2 — Emerging Candle Breakout</h3>
+              <div class="tiny">Tools: Zigzag, S/R, Candle Strength</div>
+              <p class="small"><strong>Timeframe:</strong> 1-Min Entry | 5s Observation • <strong>Duration:</strong> 1 minute</p>
+              <p class="small">How it works: Spot consolidation near S/R, wait for progressively larger candles. Enter on breakout candle with substantial body (avoid wick-only breakouts / fakeouts). Ideal breakout has 50%+ body beyond zone.</p>
+              <div class="tip">Tip: Breakouts with full body and no quick retrace are more reliable.</div>
+            </div>
+
+            <div class="card">
+              <h3>Strategy Notes (editable)</h3>
+              <textarea id="strategyNotes" placeholder="Write notes, indicators, rules..."></textarea>
+            </div>
+
+                        <div class="card">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div><strong>Images / Screenshots Pool</strong><div class="tiny">Paste image URL (Google Drive direct link recommended)</div></div>
+                <div><button id="addImageBtn" class="btn primary">+ Add Image</button></div>
+              </div>
+
+              <div id="gallery" class="gallery" style="margin-top:12px"></div>
+            </div>
+          </div>
+        </section>
+
+                <section id="tab-schema" style="display:none">
+          <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div>
+                <h2 style="margin:0">3-Month Scheme (Editable)</h2>
+                <div class="tiny">Your staged risk plan — edit & save.</div>
+              </div>
+              <div>
+                <button id="saveSchemaBtn" class="btn primary">Save Schema</button>
+                <button id="resetSchemaBtn" class="btn" style="margin-left:8px">Reset</button>
+              </div>
+            </div>
+
+            <div style="margin-top:10px" class="schema-area">
+              <textarea id="schemaText"></textarea>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+            <aside class="side">
+        <div class="card card-compact">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div><strong>Quick Controls</strong><div class="tiny muted-small">Shortcuts: W/L/Ctrl+S</div></div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+            <div style="display:flex;gap:8px">
+              <button id="btnWin" class="btn primary" style="flex:1">Mark Win (W)</button>
+              <button id="btnLoss" class="btn danger" style="flex:1">Mark Loss (L)</button>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button id="btnExport" class="btn" style="flex:1">Export CSV</button>
+              <button id="btnImport" class="btn" style="flex:1">Import CSV</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card card-compact" style="margin-top:12px">
+          <div><strong>Storage</strong></div>
+          <div class="tiny" style="margin-top:8px">Data persistent in your browser (localStorage). Use export/import to backup or share.</div>
+        </div>
+      </aside>
+    </div>
+
+    <footer>Built for your 3-month scheme • Local-only • Mobile-first design</footer>
+  </div>
+
+<script src="script.js"></script>
 
-      <div style="display:flex;flex-direction:column;align-items:flex-end">
-        <div class="tabs" role="tablist" aria-label="Main tabs">
-          <button class="tab active" data-tab="dashboard">Dashboard</button>
-          <button class="tab" data-tab="strategy">Strategy</button>
-          <button class="tab" data-tab="schema">Schema</button>
-        </div>
-        <div class="tiny" style="margin-top:6px;color:var(--muted)">Keyboard: W = Win, L = Loss, Ctrl/Cmd+S = Log</div>
-      </div>
-    </header>
-
-    <div class="grid">
-      <!-- MAIN column (will contain tab contents switched by JS) -->
-      <div class="main">
-        <!-- DASHBOARD -->
-        <section id="tab-dashboard">
-          <div class="card">
-            <div class="form-row">
-              <input id="pair" class="input" placeholder="Trading pair (e.g. USD/JPY)" />
-              <select id="result" class="select"><option value="win">Win</option><option value="loss">Loss</option></select>
-              <button id="logBtn" class="btn primary">Log Trade</button>
-              <button id="resetBtn" class="btn" title="Reset all data" style="opacity:.9">Reset</button>
-            </div>
-
-            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap">
-              <div class="small">Current Session</div>
-              <div class="tiny">Session closes when |wins - losses| ≥ 3</div>
-            </div>
-
-            <div class="bars" style="margin-top:12px">
-              <div class="card stat-card">
-                <div class="stat-row"><div class="title">Session (live)</div><div class="tiny" id="sessionLiveLabel">0W • 0L</div></div>
-                <div style="display:flex;gap:8px;align-items:center">
-                  <div style="flex:1"><div class="bar-outer"><div id="sessionLiveBar" class="bar-inner" style="background:linear-gradient(90deg,var(--neon-win), #60d2b8)"></div></div></div>
-                  <div style="width:62px;text-align:right;font-weight:700" id="sessionLivePct">0%</div>
-                </div>
-              </div>
-
-              <div class="card stat-card">
-                <div class="stat-row"><div class="title">Trades</div><div class="tiny" id="tradeLabel">0 trades</div></div>
-                <div style="display:flex;gap:8px;align-items:center">
-                  <div style="flex:1"><div class="bar-outer"><div id="tradeBar" class="bar-inner" style="background:linear-gradient(90deg,var(--neon-win), var(--accent))"></div></div></div>
-                  <div style="width:62px;text-align:right;font-weight:700" id="tradePct">0%</div>
-                </div>
-              </div>
-
-              <div class="card stat-card">
-                <div class="stat-row"><div class="title">Sessions</div><div class="tiny" id="sessionLabel">0 sessions</div></div>
-                <div style="display:flex;gap:8px;align-items:center">
-                  <div style="flex:1"><div class="bar-outer"><div id="sessionBar" class="bar-inner" style="background:linear-gradient(90deg,var(--neon-win), #3ee0b5)"></div></div></div>
-                  <div style="width:62px;text-align:right;font-weight:700" id="sessionPct">0%</div>
-                </div>
-              </div>
-            </div>
-
-            <div style="margin-top:12px" class="kpi-grid">
-              <div class="kpi"><div class="num" id="k_totalTrades">0</div><div class="label">Total Trades</div></div>
-              <div class="kpi"><div class="num pair-win" id="k_tradeWins">0</div><div class="label">Trade Wins</div></div>
-              <div class="kpi"><div class="num pair-loss" id="k_tradeLosses">0</div><div class="label">Trade Losses</div></div>
-              <div class="kpi"><div class="num" id="k_tradeDiff">0</div><div class="label">Trade Diff</div></div>
-            </div>
-          </div>
-
-          <!-- stacked cards -->
-          <div class="stack">
-            <div class="card">
-              <div style="display:flex;justify-content:space-between;align-items:center">
-                <div><strong>Trades</strong><div class="tiny">Wins / Losses / Diff / Win rate</div></div>
-                <div class="tiny" id="tradesSummary">0W • 0L</div>
-              </div>
-              <div style="margin-top:10px;display:flex;gap:12px;align-items:center;">
-                <div style="flex:1"><div class="bar-outer"><div id="tradesBar" class="bar-inner" style="background:linear-gradient(90deg,var(--neon-win), var(--accent))"></div></div></div>
-                <div style="width:80px;text-align:right;font-weight:700" id="tradesPct">0%</div>
-              </div>
-              <div style="margin-top:8px" class="tiny" id="tradesDetails"></div>
-            </div>
-
-            <div class="card">
-              <div style="display:flex;justify-content:space-between;align-items:center">
-                <div><strong>Sessions</strong><div class="tiny">Winning sessions / Losing sessions</div></div>
-                <div class="tiny" id="sessionsSummary">0W • 0L</div>
-              </div>
-              <div style="margin-top:10px;display:flex;gap:12px;align-items:center;">
-                <div style="flex:1"><div class="bar-outer"><div id="sessionsBar" class="bar-inner" style="background:linear-gradient(90deg,var(--neon-win), #3ee0b5)"></div></div></div>
-                <div style="width:80px;text-align:right;font-weight:700" id="sessionsPct">0%</div>
-              </div>
-              <div style="margin-top:8px" class="tiny" id="sessionsDetails"></div>
-            </div>
-
-            <div class="card">
-              <div style="display:flex;justify-content:space-between;align-items:center">
-                <div><strong>Days</strong><div class="tiny">Winning days / Losing days</div></div>
-                <div class="tiny" id="daysSummary">0W • 0L</div>
-              </div>
-              <div style="margin-top:10px;display:flex;gap:12px;align-items:center;">
-                <div style="flex:1"><div class="bar-outer"><div id="daysBar" class="bar-inner" style="background:linear-gradient(90deg,var(--neon-win), #7ef0c8)"></div></div></div>
-                <div style="width:80px;text-align:right;font-weight:700" id="daysPct">0%</div>
-              </div>
-              <div style="margin-top:8px" class="tiny" id="daysDetails"></div>
-            </div>
-
-            <div class="card">
-              <div style="display:flex;justify-content:space-between;align-items:center">
-                <div><strong>Weeks</strong><div class="tiny">Winning weeks / Losing weeks</div></div>
-                <div class="tiny" id="weeksSummary">0W • 0L</div>
-              </div>
-              <div style="margin-top:10px;display:flex;gap:12px;align-items:center;">
-                <div style="flex:1"><div class="bar-outer"><div id="weeksBar" class="bar-inner" style="background:linear-gradient(90deg,var(--neon-win), #9ff1d7)"></div></div></div>
-                <div style="width:80px;text-align:right;font-weight:700" id="weeksPct">0%</div>
-              </div>
-              <div style="margin-top:8px" class="tiny" id="weeksDetails"></div>
-            </div>
-          </div>
-
-          <!-- pairs table -->
-          <div class="card pairs-wrap" style="margin-top:12px">
-            <div style="display:flex;justify-content:space-between;align-items:center">
-              <div><strong>Trading Pairs Performance</strong><div class="tiny">Auto-updates on each trade</div></div>
-              <div class="tiny" id="pairCount">0 pairs</div>
-            </div>
-
-            <table class="pairs" style="margin-top:12px">
-              <thead>
-                <tr><th>Pair</th><th style="width:90px">Wins</th><th style="width:90px">Losses</th><th style="width:90px">Diff</th><th style="width:110px">Win %</th></tr>
-              </thead>
-              <tbody id="pairsTbody"></tbody>
-            </table>
-          </div>
-        </section>
-
-        <!-- STRATEGY -->
-        <section id="tab-strategy" style="display:none">
-          <div class="card strategy-grid">
-            <!-- editable strategies header -->
-            <div style="display:flex;justify-content:space-between;align-items:center">
-              <div>
-                <h2 style="margin:0">Strategy Library</h2>
-                <div class="tiny">List your strategies, tips and examples. Paste image URL links into the gallery below.</div>
-              </div>
-              <div>
-                <button id="saveStrategyBtn" class="btn primary">Save Strategy Notes</button>
-                <button id="clearStrategyBtn" class="btn" style="margin-left:8px">Reset</button>
-              </div>
-            </div>
-
-            <!-- Strategy cards (prepopulated) -->
-            <div class="strategy-card card">
-              <h3>Strategy 1 — Rejection from S/R Using Zigzag Reversal</h3>
-              <div class="tiny">Tools: Zigzag, Support/Resistance, Candle Momentum, Optional Stochastic/MACD</div>
-              <p class="small"><strong>Timeframe:</strong> 1-Min Entry | 5s Observation • <strong>Duration:</strong> 1 minute</p>
-              <p class="small">How it works: Identify zigzag highs/lows and S/R zones. Watch for shrinking bullish candles and rejection wicks at levels (especially resistance). Enter when momentum weakens near S/R using candle body size and rejection as confirmation.</p>
-              <div class="tip">Tip: Strong rejection wick after consistent candles at a key level often signals a shift. Be patient.</div>
-            </div>
-
-            <div class="strategy-card card">
-              <h3>Strategy 2 — Emerging Candle Breakout</h3>
-              <div class="tiny">Tools: Zigzag, S/R, Candle Strength</div>
-              <p class="small"><strong>Timeframe:</strong> 1-Min Entry | 5s Observation • <strong>Duration:</strong> 1 minute</p>
-              <p class="small">How it works: Spot consolidation near S/R, wait for progressively larger candles. Enter on breakout candle with substantial body (avoid wick-only breakouts / fakeouts). Ideal breakout has 50%+ body beyond zone.</p>
-              <div class="tip">Tip: Breakouts with full body and no quick retrace are more reliable.</div>
-            </div>
-
-            <div class="card">
-              <h3>Strategy Notes (editable)</h3>
-              <textarea id="strategyNotes" placeholder="Write notes, indicators, rules..."></textarea>
-            </div>
-
-            <!-- gallery controls -->
-            <div class="card">
-              <div style="display:flex;justify-content:space-between;align-items:center">
-                <div><strong>Images / Screenshots Pool</strong><div class="tiny">Paste image URL (Google Drive direct link recommended)</div></div>
-                <div><button id="addImageBtn" class="btn primary">+ Add Image</button></div>
-              </div>
-
-              <div id="gallery" class="gallery" style="margin-top:12px"></div>
-            </div>
-          </div>
-        </section>
-
-        <!-- SCHEMA -->
-        <section id="tab-schema" style="display:none">
-          <div class="card">
-            <div style="display:flex;justify-content:space-between;align-items:center">
-              <div>
-                <h2 style="margin:0">3-Month Scheme (Editable)</h2>
-                <div class="tiny">Your staged risk plan — edit & save.</div>
-              </div>
-              <div>
-                <button id="saveSchemaBtn" class="btn primary">Save Schema</button>
-                <button id="resetSchemaBtn" class="btn" style="margin-left:8px">Reset</button>
-              </div>
-            </div>
-
-            <div style="margin-top:10px" class="schema-area">
-              <textarea id="schemaText"></textarea>
-            </div>
-          </div>
-        </section>
-
-      </div>
-
-      <!-- SIDE column -->
-      <aside class="side">
-        <div class="card card-compact">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <div><strong>Quick Controls</strong><div class="tiny muted-small">Shortcuts: W/L/Ctrl+S</div></div>
-          </div>
-
-          <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
-            <div style="display:flex;gap:8px">
-              <button id="btnWin" class="btn primary" style="flex:1">Mark Win (W)</button>
-              <button id="btnLoss" class="btn danger" style="flex:1">Mark Loss (L)</button>
-            </div>
-            <div style="display:flex;gap:8px">
-              <button id="btnExport" class="btn" style="flex:1">Export CSV</button>
-              <button id="btnImport" class="btn" style="flex:1">Import CSV</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="card card-compact" style="margin-top:12px">
-          <div><strong>Storage</strong></div>
-          <div class="tiny" style="margin-top:8px">Data persistent in your browser (localStorage). Use export/import to backup or share.</div>
-        </div>
-      </aside>
-    </div>
-
-    <footer>Built for your 3-month scheme • Local-only • Mobile-first design</footer>
-  </div>
-
-<script>
-/* ---------- Data model & persistence ---------- */
-const STORAGE_KEY = 'binary_tracker_v3';
-let store = {
-  trades: [], sessions: [], days: [], weeks: [],
-  currentSession: {wins:0, losses:0},
-  currentDaySessions: [], currentWeekDays: [],
-  images: [],           // {id, url, caption}
-  strategyNotes: '',    // editable strategy notes
-  schemaText: ''        // editable schema text
-};
-
-function saveStore(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(store)); }
-function loadStore(){ const raw = localStorage.getItem(STORAGE_KEY); if(raw) store = JSON.parse(raw); }
-loadStore();
-
-/* ---------- DOM refs ---------- */
-const tabs = document.querySelectorAll('.tab');
-const sections = { dashboard: document.getElementById('tab-dashboard'), strategy: document.getElementById('tab-strategy'), schema: document.getElementById('tab-schema') };
-
-// dashboard refs (many are same as previous)
-const pairInput = document.getElementById('pair');
-const resultSelect = document.getElementById('result');
-const logBtn = document.getElementById('logBtn');
-const resetBtn = document.getElementById('resetBtn');
-
-const sessionLiveLabel = document.getElementById('sessionLiveLabel');
-const sessionLiveBar = document.getElementById('sessionLiveBar');
-const sessionLivePct = document.getElementById('sessionLivePct');
-
-const tradeBar = document.getElementById('tradeBar');
-const tradePct = document.getElementById('tradePct');
-const sessionBar = document.getElementById('sessionBar');
-const sessionPct = document.getElementById('sessionPct');
-
-const k_totalTrades = document.getElementById('k_totalTrades');
-const k_tradeWins = document.getElementById('k_tradeWins');
-const k_tradeLosses = document.getElementById('k_tradeLosses');
-const k_tradeDiff = document.getElementById('k_tradeDiff');
-
-const tradesBar = document.getElementById('tradesBar');
-const tradesPct = document.getElementById('tradesPct');
-const tradesDetails = document.getElementById('tradesDetails');
-const tradesSummary = document.getElementById('tradesSummary');
-
-const sessionsBar = document.getElementById('sessionsBar');
-const sessionsPct = document.getElementById('sessionsPct');
-const sessionsDetails = document.getElementById('sessionsDetails');
-const sessionsSummary = document.getElementById('sessionsSummary');
-
-const daysBar = document.getElementById('daysBar');
-const daysPct = document.getElementById('daysPct');
-const daysDetails = document.getElementById('daysDetails');
-const daysSummary = document.getElementById('daysSummary');
-
-const weeksBar = document.getElementById('weeksBar');
-const weeksPct = document.getElementById('weeksPct');
-const weeksDetails = document.getElementById('weeksDetails');
-const weeksSummary = document.getElementById('weeksSummary');
-
-const pairsTbody = document.getElementById('pairsTbody');
-const pairCount = document.getElementById('pairCount');
-
-const btnWin = document.getElementById('btnWin');
-const btnLoss = document.getElementById('btnLoss');
-const btnExport = document.getElementById('btnExport');
-const btnImport = document.getElementById('btnImport');
-
-/* strategy/schema refs */
-const strategyNotesEl = document.getElementById('strategyNotes');
-const saveStrategyBtn = document.getElementById('saveStrategyBtn');
-const clearStrategyBtn = document.getElementById('clearStrategyBtn');
-const galleryEl = document.getElementById('gallery');
-const addImageBtn = document.getElementById('addImageBtn');
-
-const schemaTextEl = document.getElementById('schemaText');
-const saveSchemaBtn = document.getElementById('saveSchemaBtn');
-const resetSchemaBtn = document.getElementById('resetSchemaBtn');
-
-/* small helpers */
-function uid(prefix='id'){ return prefix + '_' + Math.random().toString(36).slice(2,9); }
-function safePct(w,l){ const t = w + l; return t ? Math.round((w / t) * 100) : 0; }
-function formatDiff(w,l){ const d = w - l; return (d>0? '+'+d : d); }
-
-/* ---------- aggregates & pair stats ---------- */
-function calcPairStats(){
-  const map = {};
-  store.trades.forEach(t=>{
-    if(!t.pair) return;
-    if(!map[t.pair]) map[t.pair] = {wins:0, losses:0};
-    if(t.result === 'win') map[t.pair].wins++; else map[t.pair].losses++;
-  });
-  return map;
-}
-
-function aggregates(){
-  const tradeWins = store.trades.filter(t=>t.result==='win').length;
-  const tradeLosses = store.trades.filter(t=>t.result==='loss').length;
-  const sessionWins = store.sessions.filter(s=>s==='win').length;
-  const sessionLosses = store.sessions.filter(s=>s==='loss').length;
-  const dayWins = store.days.filter(d=>d==='win').length;
-  const dayLosses = store.days.filter(d=>d==='loss').length;
-  const weekWins = store.weeks.filter(w=>w==='win').length;
-  const weekLosses = store.weeks.filter(w=>w==='loss').length;
-  return { tradeWins, tradeLosses, sessionWins, sessionLosses, dayWins, dayLosses, weekWins, weekLosses };
-}
-
-/* ---------- rendering ---------- */
-function renderAll(){
-  saveStore();
-
-  // session live
-  const cs = store.currentSession;
-  const csTotal = cs.wins + cs.losses;
-  const csPct = csTotal ? Math.round((cs.wins / csTotal) * 100) : 0;
-  sessionLiveLabel.textContent = `${cs.wins}W • ${cs.losses}L`;
-  sessionLiveBar.style.width = csPct + '%';
-  sessionLivePct.textContent = csPct + '%';
-
-  // aggregates
-  const agg = aggregates();
-
-  // trades
-  const totalTrades = agg.tradeWins + agg.tradeLosses;
-  k_totalTrades.textContent = totalTrades;
-  k_tradeWins.textContent = agg.tradeWins;
-  k_tradeLosses.textContent = agg.tradeLosses;
-  k_tradeDiff.textContent = formatDiff(agg.tradeWins, agg.tradeLosses);
-  const tradePct = safePct(agg.tradeWins, agg.tradeLosses);
-  tradeBar.style.width = tradePct + '%'; tradePct.textContent = tradePct + '%';
-  tradesBar.style.width = tradePct + '%'; tradesPct.textContent = tradePct + '%';
-  tradesSummary.textContent = `${agg.tradeWins}W • ${agg.tradeLosses}L`;
-  tradesDetails.textContent = `Difference: ${formatDiff(agg.tradeWins, agg.tradeLosses)} • Win Rate: ${tradePct}%`;
-
-  // sessions
-  const sessionPctVal = safePct(agg.sessionWins, agg.sessionLosses);
-  sessionBar.style.width = sessionPctVal + '%'; sessionPct.textContent = sessionPctVal + '%';
-  sessionsBar.style.width = sessionPctVal + '%'; sessionsPct.textContent = sessionPctVal + '%';
-  sessionsSummary.textContent = `${agg.sessionWins}W • ${agg.sessionLosses}L`;
-  sessionsDetails.textContent = `Difference: ${formatDiff(agg.sessionWins, agg.sessionLosses)} • Rate: ${sessionPctVal}%`;
-
-  // days
-  const dayPctVal = safePct(agg.dayWins, agg.dayLosses);
-  daysBar.style.width = dayPctVal + '%'; daysPct.textContent = dayPctVal + '%';
-  daysSummary.textContent = `${agg.dayWins}W • ${agg.dayLosses}L`;
-  daysDetails.textContent = `Difference: ${formatDiff(agg.dayWins, agg.dayLosses)} • Rate: ${dayPctVal}%`;
-
-  // weeks
-  const weekPctVal = safePct(agg.weekWins, agg.weekLosses);
-  weeksBar.style.width = weekPctVal + '%'; weeksPct.textContent = weekPctVal + '%';
-  weeksSummary.textContent = `${agg.weekWins}W • ${agg.weekLosses}L`;
-  weeksDetails.textContent = `Difference: ${formatDiff(agg.weekWins, agg.weekLosses)} • Rate: ${weekPctVal}%`;
-
-  // pairs table
-  const map = calcPairStats();
-  pairsTbody.innerHTML = '';
-  const pairs = Object.keys(map).sort((a,b)=> (map[b].wins - map[b].losses) - (map[a].wins - map[a].losses));
-  pairs.forEach(pair=>{
-    const data = map[pair];
-    const diff = data.wins - data.losses;
-    const pct = safePct(data.wins, data.losses);
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td style="font-weight:600">${pair}</td>
-      <td class="pair-win">${data.wins}</td>
-      <td class="pair-loss">${data.losses}</td>
-      <td>${diff>0? '+'+diff: diff}</td>
-      <td>${pct}%</td>`;
-    pairsTbody.appendChild(tr);
-  });
-  pairCount.textContent = pairs.length + ' pairs';
-
-  // strategy notes & schema
-  strategyNotesEl.value = store.strategyNotes || '';
-  schemaTextEl.value = store.schemaText || '';
-  renderGallery();
-}
-
-/* ---------- session/day/week logic ---------- */
-function completeSessionIfNeeded(){
-  const cs = store.currentSession;
-  if(Math.abs(cs.wins - cs.losses) >= 3){
-    const res = cs.wins > cs.losses ? 'win' : 'loss';
-    store.sessions.push(res);
-    store.currentDaySessions.push(res);
-    store.currentSession = {wins:0, losses:0};
-
-    // 2 sessions -> day
-    if(store.currentDaySessions.length >= 2){
-      const s0 = store.currentDaySessions[0], s1 = store.currentDaySessions[1];
-      if(s0==='win' && s1==='win'){ store.days.push('win'); store.currentWeekDays.push('win'); }
-      else if(s0==='loss' && s1==='loss'){ store.days.push('loss'); store.currentWeekDays.push('loss'); }
-      // else neutral - do nothing
-      store.currentDaySessions = [];
-
-      // 6 days -> week (conservative)
-      if(store.currentWeekDays.length >= 6){
-        const allWin = store.currentWeekDays.every(d=>d==='win');
-        const allLoss = store.currentWeekDays.every(d=>d==='loss');
-        if(allWin) store.weeks.push('win');
-        else if(allLoss) store.weeks.push('loss');
-        store.currentWeekDays = [];
-      }
-    }
-  }
-}
-
-function logTrade(pair, result){
-  if(!pair) return;
-  const trade = { pair, result, ts: Date.now() };
-  store.trades.push(trade);
-  if(result === 'win') store.currentSession.wins++; else store.currentSession.losses++;
-  completeSessionIfNeeded();
-  renderAll();
-}
-
-/* ---------- export/import ---------- */
-function exportCSV(){
-  const rows = [['pair','result','timestamp']];
-  store.trades.forEach(t=> rows.push([t.pair, t.result, new Date(t.ts).toISOString()]));
-  const csv = rows.map(r=> r.map(c=> `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
-  const blob = new Blob([csv], {type:'text/csv'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url; a.download='binary-trades.csv'; a.click(); URL.revokeObjectURL(url);
-}
-
-function importCSVFile(file){
-  const reader = new FileReader();
-  reader.onload = e=>{
-    const text = e.target.result;
-    const lines = text.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
-    for(let i=1;i<lines.length;i++){
-      const parts = lines[i].split(',').map(p=>p.replace(/^"|"$/g,'').trim());
-      if(parts.length>=3){
-        const pair = parts[0], result = parts[1], ts = Date.parse(parts[2]) || Date.now();
-        if(pair && (result==='win' || result==='loss')) store.trades.push({pair, result, ts});
-      }
-    }
-    rebuildFromTrades();
-    renderAll();
-  };
-  reader.readAsText(file);
-}
-
-/* ---------- rebuild from trades (idempotent) ---------- */
-function rebuildFromTrades(){
-  store.sessions = []; store.days = []; store.weeks = [];
-  store.currentSession = {wins:0, losses:0}; store.currentDaySessions = []; store.currentWeekDays = [];
-  const ordered = [...store.trades].sort((a,b)=> a.ts - b.ts);
-  for(const t of ordered){
-    if(t.result==='win') store.currentSession.wins++; else store.currentSession.losses++;
-    if(Math.abs(store.currentSession.wins - store.currentSession.losses) >= 3){
-      const res = store.currentSession.wins > store.currentSession.losses ? 'win' : 'loss';
-      store.sessions.push(res);
-      store.currentDaySessions.push(res);
-      store.currentSession = {wins:0, losses:0};
-      if(store.currentDaySessions.length >= 2){
-        const s0 = store.currentDaySessions[0], s1 = store.currentDaySessions[1];
-        if(s0==='win' && s1==='win'){ store.days.push('win'); store.currentWeekDays.push('win'); }
-        else if(s0==='loss' && s1==='loss'){ store.days.push('loss'); store.currentWeekDays.push('loss'); }
-        store.currentDaySessions = [];
-        if(store.currentWeekDays.length >= 6){
-          const allWin = store.currentWeekDays.every(d=>d==='win');
-          const allLoss = store.currentWeekDays.every(d=>d==='loss');
-          if(allWin) store.weeks.push('win'); else if(allLoss) store.weeks.push('loss');
-          store.currentWeekDays = [];
-        }
-      }
-    }
-  }
-}
-
-/* ---------- strategy images (pool) ---------- */
-function renderGallery(){
-  galleryEl.innerHTML = '';
-  if(!store.images) store.images = [];
-  if(store.images.length === 0){
-    galleryEl.innerHTML = '<div class="tiny" style="opacity:.6">No images yet. Click + Add Image to paste a URL (Google Drive direct links recommended).</div>';
-    return;
-  }
-  store.images.forEach(img=>{
-    const div = document.createElement('div');
-    div.className = 'gallery-card';
-    div.innerHTML = `
-      <img src="${img.url}" alt="screenshot" onerror="this.style.opacity=.5;this.nextElementSibling && (this.nextElementSibling.textContent='Image failed to load')">
-      <div class="gallery-caption">${img.caption || ''}</div>
-      <div class="gallery-controls">
-        <button class="control-btn edit" data-id="${img.id}">✎ Edit</button>
-        <button class="control-btn del" data-id="${img.id}">✖ Delete</button>
-      </div>
-    `;
-    galleryEl.appendChild(div);
-  });
-
-  // attach listeners for edit/delete
-  galleryEl.querySelectorAll('.control-btn.edit').forEach(btn=>{
-    btn.onclick = ()=> {
-      const id = btn.getAttribute('data-id');
-      const item = store.images.find(i=>i.id===id);
-      if(!item) return;
-      const newCaption = prompt('Edit caption (leave empty to clear):', item.caption || '') ?? item.caption;
-      item.caption = newCaption;
-      saveStore(); renderGallery();
-    };
-  });
-  galleryEl.querySelectorAll('.control-btn.del').forEach(btn=>{
-    btn.onclick = ()=> {
-      const id = btn.getAttribute('data-id');
-      if(!confirm('Delete this image from gallery?')) return;
-      store.images = store.images.filter(i=>i.id!==id);
-      saveStore(); renderGallery();
-    };
-  });
-}
-
-/* prompt-based add image (simple & mobile-friendly) */
-addImageBtn.addEventListener('click', ()=>{
-  const url = prompt('Paste image URL (Google Drive direct link like https://drive.google.com/uc?export=view&id=FILE_ID):');
-  if(!url) return;
-  const caption = prompt('Optional caption / notes for this image (leave blank for none):') || '';
-  const id = uid('img');
-  store.images.unshift({id, url: url.trim(), caption: caption.trim()});
-  saveStore();
-  renderGallery();
-});
-
-/* ---------- strategy/schema save/reset ---------- */
-saveStrategyBtn.addEventListener('click', ()=>{
-  store.strategyNotes = strategyNotesEl.value || '';
-  saveStore();
-  alert('Strategy notes saved.');
-});
-clearStrategyBtn.addEventListener('click', ()=>{
-  if(!confirm('Clear strategy notes?')) return;
-  strategyNotesEl.value = '';
-  store.strategyNotes = '';
-  saveStore();
-  renderAll();
-});
-
-saveSchemaBtn.addEventListener('click', ()=>{
-  store.schemaText = schemaTextEl.value || '';
-  saveStore();
-  alert('Schema saved.');
-});
-resetSchemaBtn.addEventListener('click', ()=>{
-  if(!confirm('Reset schema to default?')) return;
-  loadDefaultSchema();
-  saveStore();
-  renderAll();
-});
-
-/* ---------- UI wiring: log/reset/export/import/keyboard ---------- */
-logBtn.addEventListener('click', ()=>{
-  const pair = pairInput.value.trim();
-  const result = resultSelect.value;
-  if(!pair) { pairInput.focus(); return; }
-  logTrade(pair, result);
-  pairInput.value = ''; pairInput.focus();
-});
-
-resetBtn.addEventListener('click', ()=>{
-  if(!confirm('Reset ALL local data? This cannot be undone.')) return;
-  store = { trades: [], sessions: [], days: [], weeks: [], currentSession:{wins:0,losses:0}, currentDaySessions: [], currentWeekDays: [], images: [], strategyNotes:'', schemaText:'' };
-  saveStore(); renderAll();
-});
-
-btnWin.addEventListener('click', ()=>{ resultSelect.value='win'; logBtn.click(); });
-btnLoss.addEventListener('click', ()=>{ resultSelect.value='loss'; logBtn.click(); });
-
-btnExport.addEventListener('click', exportCSV);
-btnImport.addEventListener('click', ()=>{
-  const inp = document.createElement('input'); inp.type='file'; inp.accept='.csv,text/csv';
-  inp.onchange = ()=>{ if(inp.files && inp.files[0]) importCSVFile(inp.files[0]); };
-  inp.click();
-});
-
-// keyboard shortcuts
-window.addEventListener('keydown', (e)=>{
-  if(e.key.toLowerCase()==='w'){ resultSelect.value='win'; pairInput.focus(); }
-  if(e.key.toLowerCase()==='l'){ resultSelect.value='loss'; pairInput.focus(); }
-  if((e.ctrlKey || e.metaKey) && e.key.toLowerCase()==='s'){ e.preventDefault(); logBtn.click(); }
-  if(e.key==='Enter' && document.activeElement === pairInput){ logBtn.click(); }
-});
-
-/* ---------- tabs handling ---------- */
-tabs.forEach(t=>{
-  t.addEventListener('click', ()=>{
-    tabs.forEach(x=>x.classList.remove('active'));
-    t.classList.add('active');
-    const target = t.getAttribute('data-tab');
-    // show/hide sections
-    Object.keys(sections).forEach(k=> sections[k].style.display = (k===target ? '' : 'none'));
-    // focus first input on dashboard
-    if(target === 'dashboard') pairInput.focus();
-  });
-});
-
-/* ---------- load defaults for schema (use your provided scheme) ---------- */
-function loadDefaultSchema(){
-  store.schemaText = `Month 1
-
-Week 1
-1 usd per trade
-3usd per session
-6usd per day
-36 usd per week
-
-Week 2
-2usd per trade
-6usd per session
-12usd per day
-72usd per week
-
-Week 3
-5usd per trade
-15usd per session
-30usd per day
-180 usd per week
-
-Week 4
-10usd per trade
-30usd per session
-60usd per day
-360 usd per week
-
-Month 1 summary
-Total: 648usd profit margin
-144 winning margin
-48 winning session
-24 winning days
-
-----
-
-Month 2
-
-Week 1
-300usd per trade
-900usd per session
-1800usd per day
-10800usd per week
-
-Week 2
-500usd per trade
-1500usd per session
-300usd per day
-18000usd per week
-
-Week 3
-1000usd per trade
-3000usd per session
-6000usd per day
-36000 usd per week
-
-Week 4
-2000usd per trade
-6000usd per session
-12000usd per day
-72000usd per week
-
-Month 3 summary
-Total: 136800usd profit margin
-144 winning margin
-48 winning session
-24 winning days
-
-Overall Summary
-Total: 153108usd profit margin
-432 winning margin
-144 winning session
-72 winning days`;
-}
-
-// initialize defaults if none
-if(!store.schemaText) loadDefaultSchema();
-if(!store.images) store.images = [];
-renderAll();
-
-/* expose small helpers to console (optional) */
-window.__BT = {
-  store, saveStore, loadStore, rebuildFromTrades, renderAll
-};
-</script>
 </body>
 </html>
